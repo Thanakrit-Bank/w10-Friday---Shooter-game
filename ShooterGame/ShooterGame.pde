@@ -1,7 +1,7 @@
 public class Shooter {
   float posX, posY, size, direction;
   int speed, hp;
-  boolean isDead = false;
+  boolean isDead, isMove;
   
   Shooter(){
     posX = width/2;
@@ -10,6 +10,8 @@ public class Shooter {
     direction = 0;
     speed = 1;
     hp = 3;
+    isDead = false;
+    isMove = false;
   }
   
   public void draw(){
@@ -32,27 +34,73 @@ public class Shooter {
     return direction;
   }
   
+  public void setBullet(int amount){
+    bullet = new Bullet[amount];
+    for (int i=0; i<amount; i++){
+      bullet[i] = new Bullet(posX +(40*i), posY);
+    }
+  }
+  
   void move(){
+    if (keyPressed == true){
+       switch (keyCode){
+          case UP:
+            // move up
+            shooter.posY -= 1;
+            break;
+            
+          case DOWN:
+            // move down
+            shooter.posY += 1;
+            break;
+            
+          case LEFT:
+            // move left
+            shooter.posX -= 1;
+            break;
+            
+          case RIGHT:
+            // move right
+            shooter.posX += 1;
+            break;
+      }
+    }
+    if (isMove == false){
+      if (posX != width/2 || posY != height/2){
+        isMove = true;
+        this.setBullet(10);
+      }
+    }
+    else if (isMove == true){
+      if (bullet[bullet.length/2].posX >= width-30){
+        this.setBullet(10);
+      }
+    }
     
   }
   
 }
 
 public class Bullet {
-  float posX = shooter.posX;
-  float posY = shooter.posY;
+  float posX, posY;
   
-  Bullet(){
-    
+  Bullet(float positionX, float positionY){
+    posX = positionX + 90;
+    posY = positionY;
   }
   
   public void draw(){
+    fill(235,200,21);
     rect(posX,posY,30,10);
   }
   
-  void move(){
+  public void move(){
+    posX += 10;
   }
   
+  public float getPosX(){
+    return posX;
+  }
 }
 
 public class Zombie {
@@ -67,32 +115,26 @@ public class Zombie {
   
 }
 
-Shooter shooter = new Shooter();
-Bullet bullet1 = new Bullet();
-float angle;
+Shooter shooter;
+Bullet[] bullet;
 
 void setup() {
   size(800,800);
   background(255);
+  
+  shooter = new Shooter();
 }
 
 void draw(){
   background(255);
   shooter.draw();
-}
-
-void keyPressed(){
-  switch (keyCode){
-    case UP:
-      angle += 1;
-      
-    case DOWN:
-      angle -= 1;
-      
-    case LEFT:
-      angle += 1;
-      
-    case RIGHT:
-      angle -= 1;
+  shooter.move();
+  
+  if (shooter.isMove == true){
+    for (Bullet bullet1 : bullet) {
+      bullet1.draw();
+      bullet1.move();
+    }
   }
+  
 }
