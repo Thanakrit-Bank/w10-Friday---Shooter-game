@@ -4,7 +4,7 @@ public class Shooter {
   boolean isDead, isMove;
   
   Shooter(){
-    posX = width/2;
+    posX = width/4;
     posY = height/2;
     size = 50;
     direction = 0;
@@ -20,6 +20,18 @@ public class Shooter {
     triangle(posX, posY - size/2, posX, posY + size/2, posX + 85, posY);
     circle(posX,posY,size);
     rect(posX+50, posY-10, 40, 20);
+    
+    /*
+    int focusX = mouseX;
+    int focusY = mouseY;
+    float rad = (atan2(posY - focusY, posX - focusX));
+    
+    float rightrim1X = posX - (cos(rad+radians(90)) * size/2);
+    float rightrim1Y = posY - (sin(rad+radians(90)) * size/2);
+    float rightrim2X = posX - (cos(rad+radians(13)) * size);
+    float rightrim2Y = posY - (sin(rad+radians(13)) * size);
+    line(rightrim1X, rightrim1Y, rightrim2X, rightrim2Y);
+    */
   }
   
   public float getPosX(){
@@ -53,38 +65,44 @@ public class Shooter {
        switch (keyCode){
           case UP:
             // move up
-            shooter.posY -= 1;
+            shooter.posY -= 3;
             break;
             
           case DOWN:
             // move down
-            shooter.posY += 1;
+            shooter.posY += 3;
             break;
             
           case LEFT:
             // move left
-            shooter.posX -= 1;
+            shooter.posX -= 3;
             break;
             
           case RIGHT:
             // move right
-            shooter.posX += 1;
+            shooter.posX += 3;
             break;
       }
     }
     if (isMove == false){
-      if (posX != width/2 || posY != height/2){
+      if (posX != width/4 || posY != height/2){
         isMove = true;
-        this.setBullet(10);
+        this.setBullet(1);
         this.setZombie(3);
       }
     }
     else if (isMove == true){
       if (bullet[bullet.length/2].posX >= width-30){
-        this.setBullet(10);
+        this.setBullet(1);
       }
     }
     
+  }
+  
+  void dead() {
+    if (hp < 1) {
+      // pass
+    }
   }
   
 }
@@ -109,17 +127,24 @@ public class Bullet {
   public float getPosX(){
     return posX;
   }
+  
+  void damage() {
+    // if () {
+      // pass
+    //}
+  }
 }
 
 public class Zombie {
   float posX, posY;
-  int speed, size;
+  int speed, size, zombie_lives;
   
   Zombie(){
-    posX = width/2;
-    posY = height/2;
-    size = 80;
+    posX = random(width);
+    posY = random(height);
+    size = 60;
     speed = 1;
+    zombie_lives = 3;
   }
   
   public void draw(){
@@ -158,6 +183,12 @@ public class Zombie {
     }
     else if (posY >= shooter.getPosY()){
       posY -= dist/500;
+    }
+  }
+  
+  void dead() {
+    if (zombie_lives < 1) {
+      // pass
     }
   }
   
