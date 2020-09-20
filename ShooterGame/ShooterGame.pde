@@ -113,24 +113,36 @@ public class Bullet {
 
 public class Zombie {
   float posX, posY;
-  int speed, hp, size;
-  boolean isDead;
+  int speed, size;
   
   Zombie(){
-    posX = random(width/2, width);
-    posY = random(height/2);
+    posX = width/2;
+    posY = height/2;
     size = 80;
     speed = 1;
-    hp = 3;
-    isDead = false;
   }
   
   public void draw(){
     fill(48,119,81);
     strokeWeight(3);
     circle(posX,posY,size);
-    line(posX, posY-size/2, posX-70, posY-size/4);
-    line(posX, posY+size/2, posX-70, posY+size/4);
+    point(posX,posY);
+    
+    int focusX = mouseX;
+    int focusY = mouseY;
+    float rad = (atan2(posY - focusY, posX - focusX));
+
+    float rightrim1X = posX - (cos(rad+radians(90)) * size/2);
+    float rightrim1Y = posY - (sin(rad+radians(90)) * size/2);
+    float rightrim2X = posX - (cos(rad+radians(13)) * size);
+    float rightrim2Y = posY - (sin(rad+radians(13)) * size);
+    line(rightrim1X, rightrim1Y, rightrim2X, rightrim2Y);
+
+    float leftrim1X = posX - (cos(rad-radians(90)) * size/2);
+    float leftrim1Y = posY - (sin(rad-radians(90)) * size/2);
+    float leftrim2X = posX - (cos(rad-radians(13)) * size);
+    float leftrim2Y = posY - (sin(rad-radians(13)) * size);
+    line(leftrim1X, leftrim1Y, leftrim2X, leftrim2Y);
   }
 
   public void move(){
