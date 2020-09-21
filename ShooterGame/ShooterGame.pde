@@ -1,6 +1,6 @@
 public class Shooter {
   float posX, posY, size, direction;
-  int speed, hp;
+  int speed, hp, x, y;
   boolean isDead, isMove;
   
   Shooter(){
@@ -19,19 +19,7 @@ public class Shooter {
     strokeWeight(3);
     triangle(posX, posY - size/2, posX, posY + size/2, posX + 85, posY);
     circle(posX,posY,size);
-    rect(posX+50, posY-10, 40, 20);
-    
-    /*
-    int focusX = mouseX;
-    int focusY = mouseY;
-    float rad = (atan2(posY - focusY, posX - focusX));
-    
-    float rightrim1X = posX - (cos(rad+radians(90)) * size/2);
-    float rightrim1Y = posY - (sin(rad+radians(90)) * size/2);
-    float rightrim2X = posX - (cos(rad+radians(13)) * size);
-    float rightrim2Y = posY - (sin(rad+radians(13)) * size);
-    line(rightrim1X, rightrim1Y, rightrim2X, rightrim2Y);
-    */
+    rect(posX+50, posY-10, 40-x, 20-y);
   }
   
   public float getPosX(){
@@ -95,16 +83,17 @@ public class Shooter {
       if (bullet[bullet.length/2].posX >= width-30){
         this.setBullet(1);
       }
-    }
-    
-  }
+    }    
+  }  
   
+ // delete size object
   void dead() {
     if (hp < 1) {
-      // pass
+      size = size - size;
+      x = 40;
+      y = 20;
     }
-  }
-  
+  }  
 }
 
 public class Bullet {
@@ -128,10 +117,17 @@ public class Bullet {
     return posX;
   }
   
+  public float getPosY(){
+    return posY;
+  }
+  
+  // zombie take damage
   void damage() {
-    // if () {
-      // pass
-    //}
+    for (Zombie zombie1 : zombie) {
+      if (zombie1.getPosX() == getPosX() && zombie1.getPosY() == getPosY()) {
+         zombie1.zombieLives();
+      }
+    }
   }
 }
 
@@ -186,12 +182,24 @@ public class Zombie {
     }
   }
   
+  public float getPosX(){
+    return posX;
+  }
+  
+  public float getPosY(){
+    return posY;
+  }
+  
+  // delete size object
   void dead() {
     if (zombie_lives < 1) {
-      // pass
+      size = size - size;
     }
   }
   
+  void zombieLives() {
+    zombie_lives -= 1;
+  }
 }
 
 Shooter shooter;
@@ -214,11 +222,12 @@ void draw(){
     for (Bullet bullet1 : bullet) {
       bullet1.draw();
       bullet1.move();
+      bullet1.damage();
     }
     for (Zombie zombie1 : zombie) {
       zombie1.draw();
       zombie1.move();
+      zombie1.dead();
     }
-  }
-  
+  }  
 }
