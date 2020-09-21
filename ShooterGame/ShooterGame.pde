@@ -1,7 +1,7 @@
 public class Shooter {
   float posX, posY, size, direction;
-  int speed, hp, x, y;
-  boolean isDead, isMove;
+  int speed;
+  boolean isEnd; // for check the shooter was killed or not
   
   Shooter(){
     posX = width/4;
@@ -9,36 +9,44 @@ public class Shooter {
     size = 50;
     direction = 0;
     speed = 1;
-    hp = 3;
-    isDead = false;
-    isMove = false;
+    isEnd = false;
   }
   
   public void draw(){
-    float rightrim1X = posX - (cos(direction+radians(90)) * size/2);
-    float rightrim1Y = posY - (sin(direction+radians(90)) * size/2);
-    
-    float leftrim1X = posX - (cos(direction-radians(90)) * size/2);
-    float leftrim1Y = posY - (sin(direction-radians(90)) * size/2);
-    
-    float midrim1X = posX - (cos(direction+radians(180)) * 5*size/3);
-    float midrim1Y = posY - (sin(direction+radians(180)) * 5*size/3);
-    
-    
-    fill(15,76,129);
-    strokeWeight(3);
-    triangle(rightrim1X, rightrim1Y, leftrim1X, leftrim1Y, midrim1X, midrim1Y);
-    circle(posX,posY,size);
-    rect(posX - (cos(direction+radians(170)) * size), posY - (sin(direction+radians(170)) * size), 40 * cos(direction+radians(180)), 20 * sin(direction+radians(180)));
-    line(posX, posY, posX - (cos(direction+radians(170)) * size), posY - (sin(direction+radians(170)) * size));
-
+    if (isEnd == false){
+      
+      // calculate position for 3 angles of traingle 
+      float rightrim1X = posX - (cos(direction+radians(90)) * size/2);
+      float rightrim1Y = posY - (sin(direction+radians(90)) * size/2);
+      
+      float leftrim1X = posX - (cos(direction-radians(90)) * size/2);
+      float leftrim1Y = posY - (sin(direction-radians(90)) * size/2);
+      
+      float midrim1X = posX - (cos(direction+radians(180)) * 5*size/3);
+      float midrim1Y = posY - (sin(direction+radians(180)) * 5*size/3);
+      
+      fill(15,76,129); // green color
+      strokeWeight(3); 
+      
+      // draw the shooter
+      triangle(rightrim1X, rightrim1Y, leftrim1X, leftrim1Y, midrim1X, midrim1Y);
+      circle(posX,posY,size);
+      rect(posX - (cos(direction+radians(170)) * size), posY - (sin(direction+radians(170)) * size), 40 * cos(direction+radians(180)), 20 * sin(direction+radians(180)));
+      line(posX, posY, posX - (cos(direction+radians(170)) * size), posY - (sin(direction+radians(170)) * size));
+    }
+    else {
+      // when isEnd == True that is the shooter was killed by zombie
+      println("Game Over");
+    }
   }
   
   public float getX(){
+    // get poition X
     return posX;
   }
   
   public float getY(){
+    // get position Y
     return posY;
   }
   
@@ -46,51 +54,37 @@ public class Shooter {
     return direction;
   }
   
-  public void setZombie(int amount){
-    for (int i=0; i<amount; i++){
-      Zombie z = new Zombie();
-      zombies.add(z);
+  public void move(String keyInput){
+    if (keyInput == "up"){
+      
+      // move forward
+      this.posX += 6 * cos(this.direction);
+      this.posY += 6 * sin(this.direction);
     }
-  }
-  
-  public void setBullet(int amount){
-    for (int i=0; i<amount; i++){
-      Bullet b = new Bullet(posX +(40*i), posY, 0);
-      bullets.add(b);
+    else if (keyInput == "down"){
+      
+      // move backward
+      this.posX -= 6 * cos(this.direction);
+      this.posY -= 6 * sin(this.direction);
     }
-  }
-  
-  void move(char keyInput){
-    if (keyInput == ' '){
-      if (bullets.get(bullets.size()/2).posX >= width-30){
-        this.setBullet(1);
+      
+    else if (keyInput == "left"){
+      
+      // turn left
+      this.direction = radians(degrees(this.direction) - 3);
+    }
+    else if (keyInput == "right"){
+      // turn right
+      this.direction = radians(degrees(this.direction) + 3);
+    }
+    else if (keyInput == "spacebar"){
+      // the shooter is shoot bullet
+      for (int i=0; i<1; i++){
+        bullets.get(i).draw();
       }
     }
-    else{
-      if (posX != width/4 || posY != height/2) {
-        this.setBullet(1);
-        this.setZombie(3);
-      }
-    }
   }
-
-  
-  // Error "NullPoiterExceptio" 
-  void dead() {
-    for (Zombie zombie1 : zombies) {
-      if (posX+size == zombie1.getPosX() && posX-size == zombie1.getPosX() || posY+size == zombie1.getPosY() && posY-size == zombie1.getPosY()) {
-        hp -= 1;
-      }
-    }
-    
-    // delete size object
-    if (hp < 1) {
-      size = size - size;
-      x = 40;
-      y = 20;
-    }
-  }  
-
+}
 
 public class Bullet {
   float posX, posY, direction;
@@ -120,11 +114,7 @@ public class Bullet {
   
   // zombie take damage
   void damage() {
-    for (Zombie zombie1 : zombies) {
-      if (zombie1.getPosX() == getPosX() && zombie1.getPosY() == getPosY()) {
-         zombie1.zombieLives();
-      }
-    }
+    
   }
 }
 
@@ -143,13 +133,12 @@ public class Zombie {
     
   }
   
-  public void draw(){
+  void draw(){
     fill(48,119,81);
     strokeWeight(3);
     circle(posX,posY,size);
     point(posX,posY);
     
-
     float rightrim1X = posX - (cos(direction+radians(90)) * size/2);
     float rightrim1Y = posY - (sin(direction+radians(90)) * size/2);
     float rightrim2X = posX - (cos(direction+radians(13)) * size);
@@ -181,16 +170,16 @@ public class Zombie {
     }
   }
   
-  public float getPosX(){
+  public float getX(){
     return posX;
   }
   
-  public float getPosY(){
+  public float getY(){
     return posY;
   }
   
-  // delete size object
-  void dead() {
+  // delete size object (pop list)
+  Boolean dead() {
     if (zombie_lives < 1) {
       size = size - size;
     }
@@ -201,67 +190,69 @@ public class Zombie {
     
   }
   
-  void zombieLives() {
-    zombie_lives -= 1;
-  }
 }
 
 Shooter shooter;
-ArrayList<Bullet> bullets = new ArrayList<Bullet>();
-int BULLETS_COUNT = 0;
-ArrayList<Zombie> zombies = new ArrayList<Zombie>();
-int ZOMBIES_COUNT = 0;
+ArrayList<Bullet> bullets;
+int BULLETS_COUNT;
+ArrayList<Zombie> zombies;
+int ZOMBIES_COUNT;
 
 void setup() {
   size(800,800);
-  background(255);
+  background(255); // set background color : white
   
-  shooter = new Shooter();
+  BULLETS_COUNT = 0;
+  ZOMBIES_COUNT = 0;
   
+  shooter = new Shooter(); // create object of the Shooter
+  bullets = new ArrayList<Bullet>(20);
+  zombies = new ArrayList<Zombie>(100);
+  for (int i=0; i<1; i++){
+      Zombie z = new Zombie();
+      zombies.add(z);
+  }
+ 
 }
 
 void draw(){
   background(255);
-  shooter.move(key);
   shooter.draw();
   
-  if (shooter.isMove == true){
-    for (Bullet bullet1 : bullets) {
-      bullet1.draw();
-      bullet1.move();
-      bullet1.damage();
-    }
+  /*
     for (Zombie zombie1 : zombies) {
       zombie1.draw();
       zombie1.move(shooter.getX(), shooter.getY());
     }
-  }
+   */
+
 }
 
 void keyPressed(){
   switch (keyCode){
     case UP:
       // move forward
-      shooter.posX += 6 * cos(shooter.direction);
-      shooter.posY += 6 * sin(shooter.direction);
+      shooter.move("up");
       break;
       
     case DOWN:
       // move backward
-      shooter.posX -= 6 * cos(shooter.direction);
-      shooter.posY -= 6 * sin(shooter.direction);
+      shooter.move("down");
       break;
       
     case LEFT:
       // turn left
-      shooter.direction = radians(degrees(shooter.direction) - 3);
+      shooter.move("left");
       break;
       
     case RIGHT:
       // turn right
-      shooter.direction = radians(degrees(shooter.direction) + 3);
+      shooter.move("right");
       break;
-  }
-  print(shooter.direction);
+      
+    case 32:
+      // spacebar
+      shooter.move("spacebar");
+      break;
   }
 }
