@@ -86,8 +86,15 @@ public class Shooter {
     }    
   }  
   
- // delete size object
+  // Error "NullPoiterExceptio" 
   void dead() {
+    for (Zombie zombie1 : zombie) {
+      if (posX+size == zombie1.getPosX() && posX-size == zombie1.getPosX() || posY+size == zombie1.getPosY() && posY-size == zombie1.getPosY()) {
+        hp -= 1;
+      }
+    }
+    
+    // delete size object
     if (hp < 1) {
       size = size - size;
       x = 40;
@@ -136,8 +143,8 @@ public class Zombie {
   int speed, size, zombie_lives;
   
   Zombie(){
-    posX = random(width);
-    posY = random(height);
+    posX = random(width)+100;
+    posY = random(height)+100;
     size = 60;
     speed = 1;
     zombie_lives = 3;
@@ -217,6 +224,7 @@ void draw(){
   background(255);
   shooter.draw();
   shooter.move();
+  shooter.dead();
   
   if (shooter.isMove == true){
     for (Bullet bullet1 : bullet) {
