@@ -1,6 +1,6 @@
 public class Shooter {
   float posX, posY, size, direction;
-  int speed, hp;
+  int speed, hp, x, y;
   boolean isDead, isMove;
   
   Shooter(){
@@ -31,6 +31,7 @@ public class Shooter {
     circle(posX,posY,size);
     rect(posX - (cos(direction+radians(170)) * size), posY - (sin(direction+radians(170)) * size), 40 * cos(direction+radians(180)), 20 * sin(direction+radians(180)));
     line(posX, posY, posX - (cos(direction+radians(170)) * size), posY - (sin(direction+radians(170)) * size));
+
   }
   
   public float getX(){
@@ -66,20 +67,30 @@ public class Shooter {
       }
     }
     else{
-      if (posX != width/4 || posY != height/2){
+      if (posX != width/4 || posY != height/2) {
         this.setBullet(1);
         this.setZombie(3);
       }
     }
   }
+
   
+  // Error "NullPoiterExceptio" 
   void dead() {
-    if (hp < 1) {
-      // pass
+    for (Zombie zombie1 : zombies) {
+      if (posX+size == zombie1.getPosX() && posX-size == zombie1.getPosX() || posY+size == zombie1.getPosY() && posY-size == zombie1.getPosY()) {
+        hp -= 1;
+      }
     }
-  }
-  
-}
+    
+    // delete size object
+    if (hp < 1) {
+      size = size - size;
+      x = 40;
+      y = 20;
+    }
+  }  
+
 
 public class Bullet {
   float posX, posY, direction;
@@ -103,10 +114,17 @@ public class Bullet {
     return posX;
   }
   
+  public float getPosY(){
+    return posY;
+  }
+  
+  // zombie take damage
   void damage() {
-    // if () {
-      // pass
-    //}
+    for (Zombie zombie1 : zombies) {
+      if (zombie1.getPosX() == getPosX() && zombie1.getPosY() == getPosY()) {
+         zombie1.zombieLives();
+      }
+    }
   }
 }
 
@@ -116,8 +134,8 @@ public class Zombie {
   
   static final int COUNT=0;
   Zombie(){
-    posX = random(width);
-    posY = random(height);
+    posX = random(width)+100;
+    posY = random(height)+100;
     size = 60;
     speed = 1;
     zombie_lives = 1;
@@ -163,9 +181,18 @@ public class Zombie {
     }
   }
   
-  Boolean die() {
+  public float getPosX(){
+    return posX;
+  }
+  
+  public float getPosY(){
+    return posY;
+  }
+  
+  // delete size object
+  void dead() {
     if (zombie_lives < 1) {
-      return true;
+      size = size - size;
     }
     return false;
   }
@@ -174,6 +201,9 @@ public class Zombie {
     
   }
   
+  void zombieLives() {
+    zombie_lives -= 1;
+  }
 }
 
 Shooter shooter;
@@ -199,6 +229,7 @@ void draw(){
     for (Bullet bullet1 : bullets) {
       bullet1.draw();
       bullet1.move();
+      bullet1.damage();
     }
     for (Zombie zombie1 : zombies) {
       zombie1.draw();
@@ -206,8 +237,8 @@ void draw(){
     }
   }
 }
-void keyPressed()
-{
+
+void keyPressed(){
   switch (keyCode){
     case UP:
       // move forward
@@ -232,4 +263,5 @@ void keyPressed()
       break;
   }
   print(shooter.direction);
+  }
 }
