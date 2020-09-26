@@ -1,5 +1,6 @@
 public class Shooter {
   float posX, posY, size, direction; // direction in radian
+  float rightmid2X, rightmid2Y;
   int speed;
   boolean isEnd; // for check the shooter was killed or not
   
@@ -13,7 +14,7 @@ public class Shooter {
   }
   
   public void draw(){
-    if (isEnd == false){
+    if (!isEnd){
       
       // calculate position for 3 angles of traingle 
       float rightrim1X = posX - (cos(direction+radians(90)) * size/2);
@@ -28,8 +29,8 @@ public class Shooter {
       float leftmid1X = posX - (cos(direction+radians(180)) * 4*size/3);
       float leftmid1Y = posY - (sin(direction+radians(180)) * 4*size/3);
       
-      float rightmid2X = posX - (cos(direction+radians(180)) * 6*size/3);
-      float rightmid2Y = posY - (sin(direction+radians(180)) * 6*size/3);
+      rightmid2X = posX - (cos(direction+radians(180)) * 6*size/3);
+      rightmid2Y = posY - (sin(direction+radians(180)) * 6*size/3);
       
       fill(15,76,129); // green color
       strokeWeight(3); 
@@ -41,10 +42,7 @@ public class Shooter {
       line(leftmid1X, leftmid1Y, rightmid2X, rightmid2Y);
       strokeWeight(3);
     }
-    else {
-      // when isEnd == True that is the shooter was killed by zombie
-      println("Game Over");
-    }
+ 
   }
   
   public float getX(){
@@ -57,32 +55,53 @@ public class Shooter {
     return posY;
   }
   
+  public float getSize(){
+    return size;
+  }
+  
   public float getDirection(){
     return direction;
   }
   
+  public float getHeadPosX(){
+    return rightmid2X;
+  }
+  
+  public float getHeadPosY(){
+    return rightmid2Y;
+  }
+  
+  public boolean set_isEnd(boolean stage){
+    isEnd = stage;
+    return isEnd;
+  }
+  
   public void move(String keyInput){
-    if (keyInput == "up"){
-      
-      // move forward
-      this.posX += 6 * cos(this.direction);
-      this.posY += 6 * sin(this.direction);
-    }
-    else if (keyInput == "down"){
-      
-      // move backward
-      this.posX -= 6 * cos(this.direction);
-      this.posY -= 6 * sin(this.direction);
-    }
-      
-    else if (keyInput == "left"){
-      
-      // turn left
-      this.direction = radians(degrees(this.direction) - 2);
-    }
-    else if (keyInput == "right"){
-      // turn right
-      this.direction = radians(degrees(this.direction) + 2);
+    if (!isEnd){
+      if (keyInput == "up"){
+        //if (this.posX >= 0 && this.posX <= width && this.posY >= 0 && this.posY <= height){
+          // move forward
+          this.posX += 6 * cos(this.direction);
+          this.posY += 6 * sin(this.direction);
+        //}
+      }
+      else if (keyInput == "down"){
+        //if (this.posX >= 0 && this.posX <= width && this.posY >= 0 && this.posY <= height){
+          // move backward
+          this.posX -= 6 * cos(this.direction);
+          this.posY -= 6 * sin(this.direction);
+        //}
+      }
+        
+      else if (keyInput == "left"){
+        
+        // turn left
+        this.direction = radians(degrees(this.direction) - 2);
+      }
+      else if (keyInput == "right"){
+        // turn right
+        this.direction = radians(degrees(this.direction) + 2);
+      }
     }
   }
 }
@@ -148,15 +167,16 @@ public class Bullet {
 
 public class Zombie {
   float posX, posY, direction=0; //direction in radian
-  int speed, size, zombie_lives;
+  int speed, size;
   static final int COUNT=0;
+  float[] posEdge = {0,width}; 
   
   Zombie(){
+    int index = int(random(posEdge.length));
     posX = random(width)+100;
-    posY = random(height)+100;
+    posY = posEdge[index];
     size = 60;
     speed = 1;
-    zombie_lives = 1;
     ZOMBIES_COUNT += 1;
     
   }
@@ -209,16 +229,12 @@ public class Zombie {
     return size;
   }
   
-  // delete size object (pop list)
-  Boolean dead() {
-    if (zombie_lives < 1) {
-      size = size - size;
+  public boolean kill(){
+    float dist = dist(this.posX, this.posY, shooter.getX(), shooter.getY());
+    if (dist < this.size + shooter.getSize()){
+      return true;
     }
     return false;
-  }
-  
-  void kill(){
-    
   }
   
 }
@@ -240,11 +256,7 @@ void setup() {
   bullets = new ArrayList<Bullet>(20);
   zombies = new ArrayList<Zombie>(100);
   
-  for (int i=0; i<1; i++){
-      Zombie z = new Zombie();
-      zombies.add(z);
-  }
- 
+  thread("generateZombieThread");
 }
 
 void draw(){
@@ -252,9 +264,14 @@ void draw(){
   shooter.draw();
   
   
-    for (Zombie zombie1 : zombies){
-      zombie1.move(shooter.getX(), shooter.getY());
-      zombie1.draw();
+    for(int i=0; i< zombies.size(); i++){
+      zombies.get(i).move(shooter.getX(), shooter.getY());
+      zombies.get(i).draw();
+      if(zombies.get(i).kill()){
+        shooter.set_isEnd(true);
+        println("Game Over");
+        noLoop();
+      }
     }
    
    for( int i =0;i<bullets.size();i++){
@@ -309,6 +326,28 @@ void draw(){
         shooter.move("right");
         break;
     }
+    
+    switch (key){
+      case 'w':
+        // move forward
+        shooter.move("up");
+        break;
+      
+      case 'a':
+        // turn left
+        shooter.move("left");
+        break;
+        
+      case 's':
+        // move backward
+        shooter.move("down");
+        break;
+        
+      case 'd':
+        // turn right
+        shooter.move("right");
+        break;
+    }
   }
 }
 
@@ -316,7 +355,14 @@ void keyPressed(){
   if(key == ' '){
     // spacebar
     Bullet b = new Bullet(shooter.getX(), shooter.getY(), shooter.getDirection());
-    bullets.add(b);
-    print(bullets.size());   
+    bullets.add(b);   
+  }
+}
+
+void generateZombieThread(){
+  while(true){
+     Zombie z = new Zombie();
+     zombies.add(z);
+     delay(2000);
   }
 }
