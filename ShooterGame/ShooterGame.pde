@@ -166,6 +166,7 @@ public class Bullet {
 public class Zombie {
   float posX, posY, direction=0; //direction in radian
   int speed, size;
+  int count; // max 3
   float[] posEdge = {0,width}; // for random position y of zombie
   
   Zombie(){
@@ -175,6 +176,7 @@ public class Zombie {
     size = 60;
     speed = 1;
     ZOMBIES_COUNT += 1;
+    count = 0;
   }
   
   void draw(){
@@ -182,7 +184,7 @@ public class Zombie {
     strokeWeight(3);
     
     // draw zombie
-    circle(posX,posY,size);
+    circle(posX,posY,size + (count * 20));
     point(posX,posY);
     
     // right leg of zombie
@@ -236,6 +238,14 @@ public class Zombie {
   }
   public int getSize(){
     return size;
+  }
+  
+  public int getCount(){
+    return count;
+  }
+  
+  public void addCount(){
+    count += 1;
   }
   
   public boolean kill(){
@@ -314,7 +324,15 @@ void draw(){
        
        if(distance < z.getSize()/2){
          // when zombie collide with bullet
-         zombies.remove(zombieIndex);
+         if (zombies.get(zombieIndex).getCount() < 3){
+           zombies.get(zombieIndex).addCount();
+         }
+         else{
+           // when count > 3 , zombie has died
+           //zombies.remove(zombieIndex);
+           //removeBulletFlag = true;
+           //zombies.get(zombieIndex).freeze(); --> padding and freeze at old position
+         }
          removeBulletFlag = true;
        }
     }
